@@ -3,7 +3,7 @@
 
 export type FilingStatus = "single" | "mfj";
 export type TaxYear = 2024 | 2025 | 2026;
-export type PayFrequency = "annual" | "semi-monthly" | "bi-weekly" | "weekly";
+export type PayFrequency = "annual" | "monthly" | "bi-weekly" | "weekly";
 
 export interface BracketDetail {
   min: number;
@@ -211,7 +211,9 @@ export interface W2Result {
   stateBracketDetails: BracketDetail[];
   totalDeductions: number;
   netAnnual: number;
+  grossPerPeriod: number;
   netPerPeriod: number;
+  netMonthly: number;
   effectiveRate: number;
 }
 
@@ -223,7 +225,7 @@ export function calculateW2(
 ): W2Result {
   const periodsPerYear: Record<PayFrequency, number> = {
     annual: 1,
-    "semi-monthly": 24,
+    monthly: 12,
     "bi-weekly": 26,
     weekly: 52,
   };
@@ -250,6 +252,8 @@ export function calculateW2(
   const netAnnual = grossAnnual - totalDeductions;
   const effectiveRate = grossAnnual > 0 ? Math.round((totalDeductions / grossAnnual) * 10000) / 100 : 0;
 
+  const netMonthly = netAnnual / 12;
+
   return {
     grossAnnual,
     payFrequency,
@@ -268,6 +272,7 @@ export function calculateW2(
     totalDeductions,
     netAnnual,
     netPerPeriod: netAnnual / periods,
+    netMonthly,
     effectiveRate,
   };
 }

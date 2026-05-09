@@ -24,7 +24,7 @@ export default function Calculator() {
   const [year, setYear] = useState<TaxYear>(2026);
   const [filingStatus, setFilingStatus] = useState<FilingStatus>("single");
   const [grossSalary, setGrossSalary] = useState<string>("");
-  const [payFrequency, setPayFrequency] = useState<PayFrequency>("annual");
+  const [payFrequency, setPayFrequency] = useState<PayFrequency>("monthly");
   const [seIncome, setSeIncome] = useState<string>("");
   const [seExpenses, setSeExpenses] = useState<string>("0");
   const [w2Result, setW2Result] = useState<W2Result | null>(null);
@@ -106,17 +106,17 @@ export default function Calculator() {
             <p className="text-blue-600 mb-6 text-sm">Calculate your take-home pay as a W-2 employee</p>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Gross Annual Salary (USD) *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Gross Annual Salary (USD) — enter your yearly income *</label>
                 <input type="number" value={grossSalary} onChange={(e) => setGrossSalary(e.target.value)} placeholder="e.g. 75000" className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-colors" min="0" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Pay Frequency</label>
                 <div className="grid grid-cols-4 gap-2">
                   {([
-                    { val: "annual" as PayFrequency, label: "Annual" },
-                    { val: "semi-monthly" as PayFrequency, label: "Semi-Monthly" },
-                    { val: "bi-weekly" as PayFrequency, label: "Bi-Weekly" },
-                    { val: "weekly" as PayFrequency, label: "Weekly" },
+    { val: "monthly" as PayFrequency, label: "Monthly" },
+                  { val: "bi-weekly" as PayFrequency, label: "Bi-Weekly" },
+                  { val: "weekly" as PayFrequency, label: "Weekly" },
+                  { val: "annual" as PayFrequency, label: "Annual" },
                   ]).map(({ val, label }) => (
                     <button key={val} onClick={() => setPayFrequency(val)} className={`py-2 px-3 rounded-lg text-xs font-medium transition-colors ${payFrequency === val ? "bg-blue-700 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>{label}</button>
                   ))}
@@ -136,7 +136,7 @@ export default function Calculator() {
             <p className="text-blue-600 mb-6 text-sm">Calculate your self-employment tax and net income</p>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Gross 1099 Income (USD) *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Gross 1099 Income (USD) — enter your yearly income *</label>
                 <input type="number" value={seIncome} onChange={(e) => setSeIncome(e.target.value)} placeholder="e.g. 100000" className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-colors" min="0" />
               </div>
               <div>
@@ -157,7 +157,7 @@ export default function Calculator() {
             <p className="text-blue-600 mb-6 text-sm">Compare take-home pay for the same gross income</p>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Gross Income (USD) *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Gross Income (USD) — enter your yearly income *</label>
                 <input type="number" value={grossSalary} onChange={(e) => setGrossSalary(e.target.value)} placeholder="e.g. 75000" className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-colors" min="0" />
               </div>
               <div className="flex gap-3 pt-2">
@@ -175,15 +175,18 @@ export default function Calculator() {
           <h2 className="text-xl font-bold text-blue-800 mb-4">W-2 Calculation Results</h2>
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="bg-blue-50 rounded-xl p-4 text-center">
-              <div className="text-xs text-blue-600 mb-1">Gross Annual</div>
-              <div className="text-lg font-bold text-blue-900">{formatUSD(w2Result.grossAnnual)}</div>
+              <div className="text-xs text-blue-600 mb-1">Gross Monthly</div>
+              <div className="text-lg font-bold text-blue-900">{formatUSD(w2Result.grossAnnual / 12)}</div>
             </div>
             <div className="bg-blue-50 rounded-xl p-4 text-center">
-              <div className="text-xs text-blue-600 mb-1">Net Annual</div>
-              <div className="text-lg font-bold text-blue-900">{formatUSD(w2Result.netAnnual)}</div>
+              <div className="text-xs text-blue-600 mb-1">Net Monthly</div>
+              <div className="text-lg font-bold text-blue-900">{formatUSD(w2Result.netMonthly)}</div>
             </div>
           </div>
-          <div className="text-sm text-gray-500 mb-4">Per period ({w2Result.payFrequency}): <strong>{formatUSD(w2Result.netPerPeriod)}</strong></div>
+          <div className="text-sm text-gray-500 mb-4">
+            Per period ({w2Result.payFrequency}): <strong>{formatUSD(w2Result.netPerPeriod)}</strong>
+            {w2Result.payFrequency !== "annual" && <span className="ml-2">| Annual: <strong>{formatUSD(w2Result.netAnnual)}</strong></span>}
+          </div>
           <div className="space-y-3 mb-6">
             <div className="flex justify-between items-center py-2 border-b border-gray-100"><span className="text-gray-600">Gross Income</span><span className="font-semibold">{formatUSD(w2Result.grossAnnual)}</span></div>
             <div className="flex justify-between items-center py-2 border-b border-gray-100"><span className="text-gray-600">Standard Deduction ({year})</span><span className="font-semibold text-blue-600">-{formatUSD(w2Result.standardDeduction)}</span></div>
