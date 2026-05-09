@@ -211,7 +211,6 @@ export interface W2Result {
   stateBracketDetails: BracketDetail[];
   totalDeductions: number;
   netAnnual: number;
-  grossPerPeriod: number;
   netPerPeriod: number;
   netMonthly: number;
   effectiveRate: number;
@@ -282,6 +281,7 @@ export function calculateW2(
 export interface SE1099Result {
   grossIncome: number;
   businessExpenses: number;
+  mileageDeduction: number;
   netSEIncome: number;
   seTaxableIncome: number;
   socialSecuritySE: number;
@@ -309,9 +309,11 @@ export function calculate1099(
   grossIncome: number,
   businessExpenses: number,
   year: TaxYear,
-  filingStatus: FilingStatus
+  filingStatus: FilingStatus,
+  mileageDeduction: number = 0
 ): SE1099Result {
-  const netSEIncome = grossIncome - businessExpenses;
+  const totalExpenses = businessExpenses + mileageDeduction;
+  const netSEIncome = grossIncome - totalExpenses;
 
   const seTaxableIncome = netSEIncome * 0.9235;
   const ssCap = SS_WAGE_CAP[year];
@@ -349,6 +351,7 @@ export function calculate1099(
   return {
     grossIncome,
     businessExpenses,
+    mileageDeduction,
     netSEIncome,
     seTaxableIncome,
     socialSecuritySE,

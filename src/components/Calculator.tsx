@@ -27,6 +27,7 @@ export default function Calculator() {
   const [payFrequency, setPayFrequency] = useState<PayFrequency>("monthly");
   const [seIncome, setSeIncome] = useState<string>("");
   const [seExpenses, setSeExpenses] = useState<string>("0");
+  const [milesDriven, setMilesDriven] = useState<string>("");
   const [w2Result, setW2Result] = useState<W2Result | null>(null);
   const [seResult, setSeResult] = useState<SE1099Result | null>(null);
   const [compareResult, setCompareResult] = useState<ComparisonResult | null>(null);
@@ -43,7 +44,8 @@ export default function Calculator() {
     const income = parseFloat(seIncome);
     if (!income || income <= 0) return;
     const expenses = parseFloat(seExpenses) || 0;
-    setSeResult(calculate1099(income, expenses, year, filingStatus));
+    const mileage = (parseFloat(milesDriven) || 0) * MILEAGE_RATE[year];
+    setSeResult(calculate1099(income, expenses + mileage, year, filingStatus));
     setW2Result(null);
     setCompareResult(null);
   };
@@ -56,6 +58,8 @@ export default function Calculator() {
     setSeResult(null);
   };
 
+  const MILEAGE_RATE: Record<TaxYear, number> = { 2024: 0.67, 2025: 0.70, 2026: 0.71 };
+
   const handleTabChange = (newTab: Tab) => {
     setTab(newTab);
     setW2Result(null);
@@ -67,6 +71,7 @@ export default function Calculator() {
     setGrossSalary("");
     setSeIncome("");
     setSeExpenses("0");
+    setMilesDriven("");
     setW2Result(null);
     setSeResult(null);
     setCompareResult(null);
@@ -141,7 +146,15 @@ export default function Calculator() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Business Expenses (USD)</label>
-                <input type="number" value={seExpenses} onChange={(e) => setSeExpenses(e.target.value)} placeholder="0" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-colors" min="0" />
+                <input type="number" value={seExpenses} onChange={(e) => setSeExpenses(e.target.value)} placeholder="e.g. office, supplies, phone" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-colors" min="0" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Miles Driven (for business)</label>
+                <p className="text-xs text-gray-500 mb-1">IRS mileage rate: {"$"}{MILEAGE_RATE[year].toFixed(2)}/mile for {year}</p>
+                <input type="number" value={milesDriven} onChange={(e) => setMilesDriven(e.target.value)} placeholder="e.g. 5000" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-colors" min="0" />
+                {milesDriven && parseFloat(milesDriven) > 0 && (
+                  <p className="text-xs text-blue-600 mt-1">Mileage deduction: <strong>{formatUSD(parseFloat(milesDriven) * MILEAGE_RATE[year])}</strong> ({parseFloat(milesDriven).toLocaleString()} miles × {"$"}{MILEAGE_RATE[year].toFixed(2)})</p>
+                )}
               </div>
               <div className="flex gap-3 pt-2">
                 <button onClick={handleSECalculate} disabled={!seIncome || parseFloat(seIncome) <= 0} className="flex-1 bg-blue-700 hover:bg-blue-800 disabled:bg-gray-300 text-white py-3 rounded-xl font-bold text-lg transition-colors">Calculate</button>
@@ -230,6 +243,9 @@ export default function Calculator() {
           <div className="space-y-3 mb-6">
             <div className="flex justify-between items-center py-2 border-b border-gray-100"><span className="text-gray-600">Gross 1099 Income</span><span className="font-semibold">{formatUSD(seResult.grossIncome)}</span></div>
             <div className="flex justify-between items-center py-2 border-b border-gray-100"><span className="text-gray-600">Business Expenses</span><span className="font-semibold text-red-600">-{formatUSD(seResult.businessExpenses)}</span></div>
+            {seResult.mileageDeduction > 0 && (
+              <div className="flex justify-between items-center py-2 border-b border-gray-100"><span className="text-gray-600">Mileage Deduction</span><span className="font-semibold text-red-600">-{formatUSD(seResult.mileageDeduction)}</span></div>
+            )}
             <div className="flex justify-between items-center py-2 border-b border-gray-100"><span className="text-gray-600">Net SE Income</span><span className="font-semibold">{formatUSD(seResult.netSEIncome)}</span></div>
             <div className="flex justify-between items-center py-2 border-b border-gray-100 text-xs text-gray-400"><span>SE Taxable Income (92.35%)</span><span>{formatUSD(seResult.seTaxableIncome)}</span></div>
             <div className="flex justify-between items-center py-2 border-b border-gray-100"><span className="text-gray-600">Self-Employment Tax (15.3%)</span><span className="font-semibold text-red-600">-{formatUSD(seResult.totalSETax)}</span></div>
