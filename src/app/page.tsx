@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Calculator from "@/components/Calculator";
 
 export const metadata: Metadata = {
-  title: "US Income Tax Calculator 2024-2025 | W-2 & 1099 | Take-Home Pay",
+  title: "US Income Tax Calculator 2024-2026 | W-2 & 1099 | Take-Home Pay",
   description:
     "Free US income tax calculator. Compare W-2 vs 1099 take-home pay, estimate self-employment tax, federal brackets, Maryland state tax, and quarterly payments.",
   keywords: [
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     "standard deduction 2025",
   ],
   openGraph: {
-    title: "US Income Tax Calculator 2024-2025",
+    title: "US Income Tax Calculator 2024-2026",
     description: "Compare W-2 vs 1099 take-home pay. Free, accurate, mobile-friendly.",
     type: "website",
     locale: "en_US",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "US Income Tax Calculator 2024-2025",
+    title: "US Income Tax Calculator 2024-2026",
     description: "Compare W-2 vs 1099 take-home pay. Federal, state, FICA, SE tax.",
   },
   alternates: {
@@ -40,14 +40,14 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+    <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Hero */}
-      <div className="bg-green-800 text-white py-8 px-4 text-center">
+      <div className="bg-blue-800 text-white py-8 px-4 text-center">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">
           🇺🇸 US Income Tax Calculator
         </h1>
-        <p className="text-green-200 text-lg">
-          W-2 & 1099 • Federal & State • 2024 & 2025 • Free
+        <p className="text-blue-200 text-lg">
+          W-2 & 1099 • Federal & State • 2024, 2025 & 2026 • Free
         </p>
       </div>
 
@@ -57,10 +57,10 @@ export default function Home() {
 
       {/* SEO Content */}
       <div className="max-w-2xl mx-auto px-4 pb-12">
-        <h2 className="text-xl font-bold text-green-800 mb-4 mt-8">
+        <h2 className="text-xl font-bold text-blue-800 mb-4 mt-8">
           How US Income Tax Works
         </h2>
-        <div className="prose prose-green text-sm text-gray-700 space-y-3">
+        <div className="prose prose-blue text-sm text-gray-700 space-y-3">
           <p>
             The US uses a <strong>progressive tax system</strong> with seven federal brackets ranging from
             10% to 37%. Your income is taxed in stages, so only the portion in each bracket is taxed at
@@ -72,22 +72,22 @@ export default function Home() {
             but can deduct half of it and may qualify for the <strong>QBI deduction</strong> (20% of
             qualified business income).
           </p>
-          <h3 className="font-bold text-green-700">Federal Tax Brackets 2025 (Single)</h3>
+          <h3 className="font-bold text-blue-700">Federal Tax Brackets 2026 (Single) — Projected</h3>
           <ul className="list-disc pl-5 space-y-1">
-            <li>10%: $0 – $11,925</li>
-            <li>12%: $11,926 – $48,475</li>
-            <li>22%: $48,476 – $103,350</li>
-            <li>24%: $103,351 – $197,300</li>
-            <li>32%: $197,301 – $250,525</li>
-            <li>35%: $250,526 – $626,350</li>
-            <li>37%: Over $626,350</li>
+            <li>10%: $0 – $12,200</li>
+            <li>12%: $12,201 – $49,550</li>
+            <li>22%: $49,551 – $105,650</li>
+            <li>24%: $105,651 – $201,350</li>
+            <li>32%: $201,351 – $256,050</li>
+            <li>35%: $256,051 – $640,000</li>
+            <li>37%: Over $640,000</li>
           </ul>
-          <h3 className="font-bold text-green-700">Maryland State Tax</h3>
+          <h3 className="font-bold text-blue-700">Maryland State Tax</h3>
           <p>
             Maryland has progressive state income tax rates from 2% to 5.75%, plus Montgomery County
             local tax of 3.2%. This calculator includes both.
           </p>
-          <h3 className="font-bold text-green-700">W-2 vs 1099: What&apos;s the Difference?</h3>
+          <h3 className="font-bold text-blue-700">W-2 vs 1099: What&apos;s the Difference?</h3>
           <p>
             W-2 employees split FICA with their employer (7.65% each). 1099 contractors pay the full
             15.3% self-employment tax but can deduct business expenses, half of SE tax, and the QBI
@@ -96,7 +96,7 @@ export default function Home() {
         </div>
 
         {/* FAQ */}
-        <h2 className="text-xl font-bold text-green-800 mb-4 mt-8">
+        <h2 className="text-xl font-bold text-blue-800 mb-4 mt-8">
           Frequently Asked Questions
         </h2>
         <div className="space-y-4 text-sm">
@@ -123,7 +123,7 @@ export default function Home() {
             },
           ].map((faq, i) => (
             <details key={i} className="bg-white rounded-lg p-4 border border-gray-200">
-              <summary className="font-semibold text-green-800 cursor-pointer">
+              <summary className="font-semibold text-blue-800 cursor-pointer">
                 {faq.q}
               </summary>
               <p className="mt-2 text-gray-600">{faq.a}</p>
@@ -133,7 +133,7 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-green-900 text-green-200 py-8 px-4 text-center text-sm">
+      <footer className="bg-blue-900 text-blue-200 py-8 px-4 text-center text-sm">
         <p>© 2025 US Tax Calculator. For informational purposes only.</p>
         <p className="mt-1">Not affiliated with the IRS or any government agency.</p>
       </footer>

@@ -2,7 +2,7 @@
 // Federal brackets 2024/2025, Maryland state tax, FICA, SE tax, QBI
 
 export type FilingStatus = "single" | "mfj";
-export type TaxYear = 2024 | 2025;
+export type TaxYear = 2024 | 2025 | 2026;
 export type PayFrequency = "annual" | "semi-monthly" | "bi-weekly" | "weekly";
 
 export interface BracketDetail {
@@ -63,16 +63,40 @@ const FEDERAL_2025_MFJ: TaxBracket[] = [
   { min: 751600, max: null, rate: 0.37 },
 ];
 
+// Federal 2026 - Single (projected, based on IRS inflation adjustments)
+const FEDERAL_2026_SINGLE: TaxBracket[] = [
+  { min: 0, max: 12200, rate: 0.10 },
+  { min: 12200, max: 49550, rate: 0.12 },
+  { min: 49550, max: 105650, rate: 0.22 },
+  { min: 105650, max: 201350, rate: 0.24 },
+  { min: 201350, max: 256050, rate: 0.32 },
+  { min: 256050, max: 640000, rate: 0.35 },
+  { min: 640000, max: null, rate: 0.37 },
+];
+
+// Federal 2026 - MFJ (projected)
+const FEDERAL_2026_MFJ: TaxBracket[] = [
+  { min: 0, max: 24400, rate: 0.10 },
+  { min: 24400, max: 99100, rate: 0.12 },
+  { min: 99100, max: 211300, rate: 0.22 },
+  { min: 211300, max: 402700, rate: 0.24 },
+  { min: 402700, max: 512100, rate: 0.32 },
+  { min: 512100, max: 768000, rate: 0.35 },
+  { min: 768000, max: null, rate: 0.37 },
+];
+
 // Standard Deductions
 const STANDARD_DEDUCTION: Record<TaxYear, Record<FilingStatus, number>> = {
   2024: { single: 14600, mfj: 29200 },
   2025: { single: 15000, mfj: 30000 },
+  2026: { single: 15350, mfj: 30700 },
 };
 
 // Social Security Wage Cap
 const SS_WAGE_CAP: Record<TaxYear, number> = {
   2024: 168600,
   2025: 176100,
+  2026: 177000,
 };
 
 // FICA Rates
@@ -109,6 +133,28 @@ const MD_2024_MFJ: TaxBracket[] = [
 const MD_2025_SINGLE = MD_2024_SINGLE;
 const MD_2025_MFJ = MD_2024_MFJ;
 
+// 2026 Maryland brackets (projected, same structure)
+const MD_2026_SINGLE: TaxBracket[] = [
+  { min: 0, max: 1000, rate: 0.02 },
+  { min: 1000, max: 2000, rate: 0.03 },
+  { min: 2000, max: 3000, rate: 0.04 },
+  { min: 3000, max: 100000, rate: 0.0475 },
+  { min: 100000, max: 125000, rate: 0.05 },
+  { min: 125000, max: 150000, rate: 0.0525 },
+  { min: 150000, max: 250000, rate: 0.055 },
+  { min: 250000, max: null, rate: 0.0575 },
+];
+const MD_2026_MFJ: TaxBracket[] = [
+  { min: 0, max: 1000, rate: 0.02 },
+  { min: 1000, max: 2000, rate: 0.03 },
+  { min: 2000, max: 3000, rate: 0.04 },
+  { min: 3000, max: 150000, rate: 0.0475 },
+  { min: 150000, max: 175000, rate: 0.05 },
+  { min: 175000, max: 225000, rate: 0.0525 },
+  { min: 225000, max: 300000, rate: 0.055 },
+  { min: 300000, max: null, rate: 0.0575 },
+];
+
 // Montgomery County local tax
 const MO_CO_LOCAL_RATE = 0.032;
 // Maryland standard deduction (simplified)
@@ -117,12 +163,14 @@ const MD_STD_DEDUCTION = 2550;
 // Helpers
 function getFederalBrackets(year: TaxYear, status: FilingStatus): TaxBracket[] {
   if (year === 2024) return status === "single" ? FEDERAL_2024_SINGLE : FEDERAL_2024_MFJ;
-  return status === "single" ? FEDERAL_2025_SINGLE : FEDERAL_2025_MFJ;
+  if (year === 2025) return status === "single" ? FEDERAL_2025_SINGLE : FEDERAL_2025_MFJ;
+  return status === "single" ? FEDERAL_2026_SINGLE : FEDERAL_2026_MFJ;
 }
 
 function getMarylandBrackets(year: TaxYear, status: FilingStatus): TaxBracket[] {
   if (year === 2024) return status === "single" ? MD_2024_SINGLE : MD_2024_MFJ;
-  return status === "single" ? MD_2025_SINGLE : MD_2025_MFJ;
+  if (year === 2025) return status === "single" ? MD_2025_SINGLE : MD_2025_MFJ;
+  return status === "single" ? MD_2026_SINGLE : MD_2026_MFJ;
 }
 
 function calcBrackets(income: number, brackets: TaxBracket[]): { tax: number; details: BracketDetail[] } {
@@ -286,7 +334,9 @@ export function calculate1099(
 
   const quarterlyDueDates = year === 2024
     ? ["April 15, 2024", "June 17, 2024", "September 16, 2024", "January 15, 2025"]
-    : ["April 15, 2025", "June 16, 2025", "September 15, 2025", "January 15, 2026"];
+    : year === 2025
+    ? ["April 15, 2025", "June 16, 2025", "September 15, 2025", "January 15, 2026"]
+    : ["April 15, 2026", "June 15, 2026", "September 15, 2026", "January 15, 2027"];
 
   return {
     grossIncome,
