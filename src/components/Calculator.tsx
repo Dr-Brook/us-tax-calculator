@@ -203,6 +203,15 @@ export default function Calculator() {
             <div className="flex justify-between items-center py-3 bg-blue-50 -mx-6 px-6 rounded-b-xl"><span className="font-bold text-blue-800 text-lg">Net Take-Home</span><span className="font-bold text-blue-800 text-lg">{formatUSD(w2Result.netAnnual)}</span></div>
           </div>
           <div className="text-sm text-gray-500 mb-6">Effective Tax Rate: <strong>{w2Result.effectiveRate}%</strong></div>
+          <div className="bg-blue-50 rounded-xl p-4 mb-6 border border-blue-200">
+            <h3 className="font-bold text-blue-800 mb-2">Monthly Breakdown</h3>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="flex justify-between"><span className="text-gray-600">Federal Tax/mo</span><span className="font-semibold text-red-600">{formatUSD(w2Result.federalTax / 12)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-600">FICA/mo</span><span className="font-semibold text-red-600">{formatUSD(w2Result.totalFICA / 12)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-600">State Tax/mo</span><span className="font-semibold text-red-600">{formatUSD(w2Result.stateTax / 12)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-600">Total Deductions/mo</span><span className="font-bold text-red-600">{formatUSD(w2Result.totalDeductions / 12)}</span></div>
+            </div>
+          </div>
           <h3 className="font-bold text-gray-700 mb-3">Federal Tax Brackets ({year} - {filingStatus === "single" ? "Single" : "MFJ"})</h3>
           <BracketTable details={w2Result.federalBracketDetails} />
           <h3 className="font-bold text-gray-700 mb-3 mt-6">Maryland State Tax Brackets</h3>
@@ -215,8 +224,8 @@ export default function Calculator() {
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-blue-100">
           <h2 className="text-xl font-bold text-blue-800 mb-4">1099 / Self-Employed Results</h2>
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="bg-blue-50 rounded-xl p-4 text-center"><div className="text-xs text-blue-600 mb-1">Gross Income</div><div className="text-lg font-bold text-blue-900">{formatUSD(seResult.grossIncome)}</div></div>
-            <div className="bg-blue-50 rounded-xl p-4 text-center"><div className="text-xs text-blue-600 mb-1">Net Income</div><div className="text-lg font-bold text-blue-900">{formatUSD(seResult.netIncome)}</div></div>
+            <div className="bg-blue-50 rounded-xl p-4 text-center"><div className="text-xs text-blue-600 mb-1">Gross Monthly</div><div className="text-lg font-bold text-blue-900">{formatUSD(seResult.grossIncome / 12)}</div></div>
+            <div className="bg-blue-50 rounded-xl p-4 text-center"><div className="text-xs text-blue-600 mb-1">Net Monthly</div><div className="text-lg font-bold text-blue-900">{formatUSD(seResult.netMonthly)}</div></div>
           </div>
           <div className="space-y-3 mb-6">
             <div className="flex justify-between items-center py-2 border-b border-gray-100"><span className="text-gray-600">Gross 1099 Income</span><span className="font-semibold">{formatUSD(seResult.grossIncome)}</span></div>
@@ -237,6 +246,15 @@ export default function Calculator() {
             <div className="flex justify-between items-center py-2"><span className="font-bold text-blue-800 text-lg">Net Income</span><span className="font-bold text-blue-800 text-lg">{formatUSD(seResult.netIncome)}</span></div>
           </div>
           <div className="text-sm text-gray-500 mb-6">Effective Tax Rate: <strong>{seResult.effectiveRate}%</strong></div>
+          <div className="bg-blue-50 rounded-xl p-4 mb-6 border border-blue-200">
+            <h3 className="font-bold text-blue-800 mb-2">Monthly Breakdown</h3>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="flex justify-between"><span className="text-gray-600">Federal Tax/mo</span><span className="font-semibold text-red-600">{formatUSD(seResult.federalTax / 12)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-600">SE Tax/mo</span><span className="font-semibold text-red-600">{formatUSD(seResult.totalSETax / 12)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-600">State Tax/mo</span><span className="font-semibold text-red-600">{formatUSD(seResult.stateTax / 12)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-600">Total Tax/mo</span><span className="font-bold text-red-600">{formatUSD(seResult.totalTax / 12)}</span></div>
+            </div>
+          </div>
           <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200 mb-6">
             <h3 className="font-bold text-yellow-800 mb-2">Estimated Quarterly Payments</h3>
             <p className="text-sm text-yellow-700 mb-3">Self-employed individuals must make estimated tax payments quarterly:</p>
@@ -263,12 +281,13 @@ export default function Calculator() {
           <h2 className="text-xl font-bold text-blue-800 mb-4">W-2 vs 1099 Comparison</h2>
           <p className="text-sm text-gray-600 mb-4">Gross Income: <strong>{formatUSD(compareResult.grossIncome)}</strong></p>
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="bg-blue-50 rounded-xl p-4 text-center"><div className="text-xs text-blue-600 mb-1">W-2 Net</div><div className="text-lg font-bold text-blue-900">{formatUSD(compareResult.w2NetIncome)}</div><div className="text-xs text-gray-400">{compareResult.w2EffectiveRate}% effective</div></div>
-            <div className="bg-blue-50 rounded-xl p-4 text-center"><div className="text-xs text-blue-600 mb-1">1099 Net</div><div className="text-lg font-bold text-blue-900">{formatUSD(compareResult.se1099NetIncome)}</div><div className="text-xs text-gray-400">{compareResult.se1099EffectiveRate}% effective</div></div>
+            <div className="bg-blue-50 rounded-xl p-4 text-center"><div className="text-xs text-blue-600 mb-1">W-2 Net Monthly</div><div className="text-lg font-bold text-blue-900">{formatUSD(compareResult.w2NetIncome / 12)}</div><div className="text-xs text-gray-400">{compareResult.w2EffectiveRate}% effective</div></div>
+            <div className="bg-blue-50 rounded-xl p-4 text-center"><div className="text-xs text-blue-600 mb-1">1099 Net Monthly</div><div className="text-lg font-bold text-blue-900">{formatUSD(compareResult.se1099NetIncome / 12)}</div><div className="text-xs text-gray-400">{compareResult.se1099EffectiveRate}% effective</div></div>
           </div>
           <div className={`rounded-xl p-4 mb-6 text-center ${compareResult.difference >= 0 ? "bg-blue-50 border border-blue-200" : "bg-red-50 border border-red-200"}`}>
-            <div className="text-sm text-gray-600 mb-1">1099 earns {compareResult.difference >= 0 ? "more" : "less"}:</div>
-            <div className={`text-2xl font-bold ${compareResult.difference >= 0 ? "text-blue-700" : "text-red-700"}`}>{compareResult.difference >= 0 ? "+" : ""}{formatUSD(Math.abs(compareResult.difference))}</div>
+            <div className="text-sm text-gray-600 mb-1">1099 earns {compareResult.difference >= 0 ? "more" : "less"} per month:</div>
+            <div className={`text-2xl font-bold ${compareResult.difference >= 0 ? "text-blue-700" : "text-red-700"}`}>{compareResult.difference >= 0 ? "+" : ""}{formatUSD(Math.abs(compareResult.difference / 12))}/mo</div>
+            <div className="text-xs text-gray-400 mt-1">({compareResult.difference >= 0 ? "+" : ""}{formatUSD(Math.abs(compareResult.difference))}/yr)</div>
           </div>
           <div className="space-y-3 mb-6">
             <div className="flex justify-between items-center py-2 border-b border-gray-100"><span className="text-gray-600">SE Tax Penalty</span><span className="font-semibold text-red-600">+{formatUSD(compareResult.seTaxPenalty)}</span></div>

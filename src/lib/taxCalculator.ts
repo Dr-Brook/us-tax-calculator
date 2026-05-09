@@ -299,6 +299,7 @@ export interface SE1099Result {
   stateBracketDetails: BracketDetail[];
   totalTax: number;
   netIncome: number;
+  netMonthly: number;
   effectiveRate: number;
   quarterlyPayment: number;
   quarterlyDueDates: string[];
@@ -337,6 +338,8 @@ export function calculate1099(
   const netIncome = grossIncome - businessExpenses - totalTax;
   const effectiveRate = grossIncome > 0 ? Math.round((totalTax / grossIncome) * 10000) / 100 : 0;
 
+  const netMonthly = netIncome / 12;
+
   const quarterlyDueDates = year === 2024
     ? ["April 15, 2024", "June 17, 2024", "September 16, 2024", "January 15, 2025"]
     : year === 2025
@@ -363,6 +366,7 @@ export function calculate1099(
     stateBracketDetails: md.details,
     totalTax,
     netIncome,
+    netMonthly,
     effectiveRate,
     quarterlyPayment: Math.round(totalTax / 4 * 100) / 100,
     quarterlyDueDates,
