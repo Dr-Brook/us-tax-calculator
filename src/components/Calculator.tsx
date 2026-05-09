@@ -28,6 +28,10 @@ export default function Calculator() {
   const [seIncome, setSeIncome] = useState<string>("");
   const [seExpenses, setSeExpenses] = useState<string>("0");
   const [milesDriven, setMilesDriven] = useState<string>("");
+  const [monthlyMode, setMonthlyMode] = useState<boolean>(false);
+  const [monthlyData, setMonthlyData] = useState<{income: string; miles: string; expenses: string}[]>(
+    Array.from({length: 12}, () => ({income: "", miles: "", expenses: "0"}))
+  );
   const [w2Result, setW2Result] = useState<W2Result | null>(null);
   const [seResult, setSeResult] = useState<SE1099Result | null>(null);
   const [compareResult, setCompareResult] = useState<ComparisonResult | null>(null);
@@ -41,11 +45,25 @@ export default function Calculator() {
   };
 
   const handleSECalculate = () => {
-    const income = parseFloat(seIncome);
-    if (!income || income <= 0) return;
-    const expenses = parseFloat(seExpenses) || 0;
-    const mileage = (parseFloat(milesDriven) || 0) * MILEAGE_RATE[year];
-    setSeResult(calculate1099(income, expenses + mileage, year, filingStatus));
+    if (monthlyMode) {
+      let totalIncome = 0;
+      let totalMileage = 0;
+      let totalExpenses = 0;
+      monthlyData.forEach(m => {
+        totalIncome += parseFloat(m.income) || 0;
+        totalMileage += parseFloat(m.miles) || 0;
+        totalExpenses += parseFloat(m.expenses) || 0;
+      });
+      if (totalIncome <= 0) return;
+      const mileageDeduction = totalMileage * MILEAGE_RATE[year];
+      setSeResult(calculate1099(totalIncome, totalExpenses + mileageDeduction, year, filingStatus, mileageDeduction));
+    } else {
+      const income = parseFloat(seIncome);
+      if (!income || income <= 0) return;
+      const expenses = parseFloat(seExpenses) || 0;
+      const mileage = (parseFloat(milesDriven) || 0) * MILEAGE_RATE[year];
+      setSeResult(calculate1099(income, expenses + mileage, year, filingStatus, mileage));
+    }
     setW2Result(null);
     setCompareResult(null);
   };
@@ -59,6 +77,7 @@ export default function Calculator() {
   };
 
   const MILEAGE_RATE: Record<TaxYear, number> = { 2024: 0.67, 2025: 0.70, 2026: 0.725 };
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   const handleTabChange = (newTab: Tab) => {
     setTab(newTab);
@@ -138,28 +157,72 @@ export default function Calculator() {
         {tab === "1099" && (
           <>
             <h2 className="text-2xl font-bold text-blue-800 mb-1">1099 / Self-Employed Calculator</h2>
-            <p className="text-blue-600 mb-6 text-sm">Calculate your self-employment tax and net income</p>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Gross 1099 Income (USD) — enter your yearly income *</label>
-                <input type="number" value={seIncome} onChange={(e) => setSeIncome(e.target.value)} placeholder="e.g. 100000" className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-colors" min="0" />
+            <p className="text-blue-600 mb-4 text-sm">Calculate your self-employment tax and net income</p>
+            
+            {/* Annual vs Monthly toggle */}
+            <div className="flex mb-6 bg-gray-200 rounded-xl p-1">
+              <button onClick={() => { setMonthlyMode(false); }} className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${!monthlyMode ? "bg-white text-blue-800 shadow-sm" : "text-gray-600"}`}>Annual</button>
+              <button onClick={() => { setMonthlyMode(true); }} className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${monthlyMode ? "bg-white text-blue-800 shadow-sm" : "text-gray-600"}`}>Month-by-Month</button>
+            </div>
+
+            {!monthlyMode ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Gross 1099 Income (USD) — enter your yearly income *</label>
+                  <input type="number" value={seIncome} onChange={(e) => setSeIncome(e.target.value)} placeholder="e.g. 100000" className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-colors" min="0" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Business Expenses (USD)</label>
+                  <input type="number" value={seExpenses} onChange={(e) => setSeExpenses(e.target.value)} placeholder="e.g. office, supplies, phone" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-colors" min="0" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Miles Driven (for business)</label>
+                  <p className="text-xs text-gray-500 mb-1">IRS mileage rate: {"$"}{MILEAGE_RATE[year].toFixed(2)}/mile for {year}</p>
+                  <input type="number" value={milesDriven} onChange={(e) => setMilesDriven(e.target.value)} placeholder="e.g. 5000" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-colors" min="0" />
+                  {milesDriven && parseFloat(milesDriven) > 0 && (
+                    <p className="text-xs text-blue-600 mt-1">Mileage deduction: <strong>{formatUSD(parseFloat(milesDriven) * MILEAGE_RATE[year])}</strong> ({parseFloat(milesDriven).toLocaleString()} miles)</p>
+                  )}
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Business Expenses (USD)</label>
-                <input type="number" value={seExpenses} onChange={(e) => setSeExpenses(e.target.value)} placeholder="e.g. office, supplies, phone" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-colors" min="0" />
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600 mb-2">Enter each month&apos;s income and miles. We&apos;ll calculate how much to set aside.</p>
+                <div className="grid grid-cols-12 gap-1 text-xs font-semibold text-gray-500 mb-1">
+                  <div className="col-span-1">Mo</div>
+                  <div className="col-span-4">Income ($)</div>
+                  <div className="col-span-3">Miles</div>
+                  <div className="col-span-3">Expenses ($)</div>
+                  <div className="col-span-1"></div>
+                </div>
+                {monthlyData.map((m, i) => (
+                  <div key={i} className="grid grid-cols-12 gap-1 items-center">
+                    <div className="col-span-1 text-sm font-medium text-gray-600">{MONTHS[i]}</div>
+                    <div className="col-span-4">
+                      <input type="number" value={m.income} onChange={(e) => { const newData = [...monthlyData]; newData[i] = {...newData[i], income: e.target.value}; setMonthlyData(newData); }} placeholder="0" className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-blue-500 outline-none" min="0" />
+                    </div>
+                    <div className="col-span-3">
+                      <input type="number" value={m.miles} onChange={(e) => { const newData = [...monthlyData]; newData[i] = {...newData[i], miles: e.target.value}; setMonthlyData(newData); }} placeholder="0" className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-blue-500 outline-none" min="0" />
+                    </div>
+                    <div className="col-span-3">
+                      <input type="number" value={m.expenses} onChange={(e) => { const newData = [...monthlyData]; newData[i] = {...newData[i], expenses: e.target.value}; setMonthlyData(newData); }} placeholder="0" className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-blue-500 outline-none" min="0" />
+                    </div>
+                    <div className="col-span-1 text-xs text-gray-400">
+                      {m.income && parseFloat(m.income) > 0 ? formatUSD(parseFloat(m.income || "0") * (seResult?.effectiveRate || 30) / 100) : "—"}
+                    </div>
+                  </div>
+                ))}
+                <div className="grid grid-cols-12 gap-1 pt-2 border-t border-gray-200 font-semibold text-sm">
+                  <div className="col-span-1">Total</div>
+                  <div className="col-span-4">{formatUSD(monthlyData.reduce((s, m) => s + (parseFloat(m.income) || 0), 0))}</div>
+                  <div className="col-span-3">{monthlyData.reduce((s, m) => s + (parseFloat(m.miles) || 0), 0).toLocaleString()} mi</div>
+                  <div className="col-span-3">{formatUSD(monthlyData.reduce((s, m) => s + (parseFloat(m.expenses) || 0), 0))}</div>
+                  <div className="col-span-1"></div>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Miles Driven (for business)</label>
-                <p className="text-xs text-gray-500 mb-1">IRS mileage rate: {"$"}{MILEAGE_RATE[year].toFixed(2)}/mile for {year}</p>
-                <input type="number" value={milesDriven} onChange={(e) => setMilesDriven(e.target.value)} placeholder="e.g. 5000" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-colors" min="0" />
-                {milesDriven && parseFloat(milesDriven) > 0 && (
-                  <p className="text-xs text-blue-600 mt-1">Mileage deduction: <strong>{formatUSD(parseFloat(milesDriven) * MILEAGE_RATE[year])}</strong> ({parseFloat(milesDriven).toLocaleString()} miles × {"$"}{MILEAGE_RATE[year].toFixed(2)})</p>
-                )}
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button onClick={handleSECalculate} disabled={!seIncome || parseFloat(seIncome) <= 0} className="flex-1 bg-blue-700 hover:bg-blue-800 disabled:bg-gray-300 text-white py-3 rounded-xl font-bold text-lg transition-colors">Calculate</button>
-                <button onClick={handleReset} className="px-6 py-3 border-2 border-gray-200 text-gray-500 hover:border-red-300 hover:text-red-500 rounded-xl font-medium transition-colors">Reset</button>
-              </div>
+            )}
+            <div className="flex gap-3 pt-4">
+              <button onClick={handleSECalculate} disabled={monthlyMode ? monthlyData.reduce((s, m) => s + (parseFloat(m.income) || 0), 0) <= 0 : !seIncome || parseFloat(seIncome) <= 0} className="flex-1 bg-blue-700 hover:bg-blue-800 disabled:bg-gray-300 text-white py-3 rounded-xl font-bold text-lg transition-colors">Calculate</button>
+              <button onClick={handleReset} className="px-6 py-3 border-2 border-gray-200 text-gray-500 hover:border-red-300 hover:text-red-500 rounded-xl font-medium transition-colors">Reset</button>
             </div>
           </>
         )}
