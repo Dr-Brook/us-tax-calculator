@@ -271,6 +271,50 @@ export default function Calculator() {
               <div className="flex justify-between"><span className="text-gray-600">Total Tax/mo</span><span className="font-bold text-red-600">{formatUSD(seResult.totalTax / 12)}</span></div>
             </div>
           </div>
+          <div className="bg-amber-50 rounded-xl p-4 mb-6 border border-amber-300">
+            <h3 className="font-bold text-amber-800 mb-2">💡 Monthly Tax Set-Aside</h3>
+            <p className="text-sm text-amber-700 mb-3">Self-employment income varies. Based on your effective rate, set aside this % of each month&apos;s income for taxes:</p>
+            <div className="bg-white rounded-lg p-3 text-center mb-3">
+              <div className="text-3xl font-bold text-amber-800">{seResult.effectiveRate}%</div>
+              <div className="text-sm text-gray-500">of every dollar earned</div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="bg-white rounded-lg p-2 text-center">
+                <div className="text-xs text-gray-500">If you earn $5K/mo</div>
+                <div className="font-bold text-amber-800">Set aside {formatUSD(5000 * seResult.effectiveRate / 100)}</div>
+              </div>
+              <div className="bg-white rounded-lg p-2 text-center">
+                <div className="text-xs text-gray-500">If you earn $8K/mo</div>
+                <div className="font-bold text-amber-800">Set aside {formatUSD(8000 * seResult.effectiveRate / 100)}</div>
+              </div>
+              <div className="bg-white rounded-lg p-2 text-center">
+                <div className="text-xs text-gray-500">If you earn $10K/mo</div>
+                <div className="font-bold text-amber-800">Set aside {formatUSD(10000 * seResult.effectiveRate / 100)}</div>
+              </div>
+              <div className="bg-white rounded-lg p-2 text-center">
+                <div className="text-xs text-gray-500">If you earn $15K/mo</div>
+                <div className="font-bold text-amber-800">Set aside {formatUSD(15000 * seResult.effectiveRate / 100)}</div>
+              </div>
+            </div>
+            <div className="mt-3 p-3 bg-white rounded-lg">
+              <label className="text-sm font-semibold text-gray-700 block mb-1">Your actual monthly income ($)</label>
+              <div className="flex gap-2">
+                <input 
+                  type="number" 
+                  placeholder="e.g. 6000" 
+                  className="flex-1 px-3 py-2 border-2 border-amber-300 rounded-lg text-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none" 
+                  min="0"
+                  onChange={(e) => {
+                    const el = document.getElementById('setAsideResult');
+                    const val = parseFloat(e.target.value) || 0;
+                    if (el) el.textContent = formatUSD(val * seResult.effectiveRate / 100);
+                  }}
+                />
+                <div className="flex items-center px-4 bg-amber-100 rounded-lg font-bold text-amber-800" id="setAsideResult">{formatUSD(0)}</div>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Set aside this amount each month for quarterly payments</p>
+            </div>
+          </div>
           <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200 mb-6">
             <h3 className="font-bold text-yellow-800 mb-2">Estimated Quarterly Payments</h3>
             <p className="text-sm text-yellow-700 mb-3">Self-employed individuals must make estimated tax payments quarterly:</p>
