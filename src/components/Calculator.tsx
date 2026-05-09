@@ -32,6 +32,7 @@ export default function Calculator() {
   const [monthlyData, setMonthlyData] = useState<{income: string; miles: string; expenses: string}[]>(
     Array.from({length: 12}, () => ({income: "", miles: "", expenses: "0"}))
   );
+  const [monthlySetAside, setMonthlySetAside] = useState<{rate: number; monthsEntered: number; annualizedIncome: number} | null>(null);
   const [w2Result, setW2Result] = useState<W2Result | null>(null);
   const [seResult, setSeResult] = useState<SE1099Result | null>(null);
   const [compareResult, setCompareResult] = useState<ComparisonResult | null>(null);
@@ -49,20 +50,34 @@ export default function Calculator() {
       let totalIncome = 0;
       let totalMileage = 0;
       let totalExpenses = 0;
+      let monthsEntered = 0;
       monthlyData.forEach(m => {
-        totalIncome += parseFloat(m.income) || 0;
+        const inc = parseFloat(m.income) || 0;
+        totalIncome += inc;
         totalMileage += parseFloat(m.miles) || 0;
         totalExpenses += parseFloat(m.expenses) || 0;
+        if (inc > 0) monthsEntered++;
       });
       if (totalIncome <= 0) return;
       const mileageDeduction = totalMileage * MILEAGE_RATE[year];
+      // Annualize: project partial year to full year
+      const annualizedIncome = monthsEntered > 0 && monthsEntered < 12 ? totalIncome * (12 / monthsEntered) : totalIncome;
+      const annualizedMileage = monthsEntered > 0 && monthsEntered < 12 ? totalMileage * (12 / monthsEntered) : totalMileage;
+      const annualizedExpenses = monthsEntered > 0 && monthsEntered < 12 ? totalExpenses * (12 / monthsEntered) : totalExpenses;
+      const annualizedMileageDeduction = annualizedMileage * MILEAGE_RATE[year];
+      const annualResult = calculate1099(annualizedIncome, annualizedExpenses + annualizedMileageDeduction, year, filingStatus, annualizedMileageDeduction);
+      const effectiveRate = annualResult.effectiveRate;
+      // But show actual numbers based on actual entries
       setSeResult(calculate1099(totalIncome, totalExpenses + mileageDeduction, year, filingStatus, mileageDeduction));
+      // Override the set-aside to use annualized rate
+      setMonthlySetAside({ rate: effectiveRate, monthsEntered, annualizedIncome });
     } else {
       const income = parseFloat(seIncome);
       if (!income || income <= 0) return;
       const expenses = parseFloat(seExpenses) || 0;
       const mileage = (parseFloat(milesDriven) || 0) * MILEAGE_RATE[year];
       setSeResult(calculate1099(income, expenses + mileage, year, filingStatus, mileage));
+      setMonthlySetAside(null);
     }
     setW2Result(null);
     setCompareResult(null);
@@ -91,6 +106,8 @@ export default function Calculator() {
     setSeIncome("");
     setSeExpenses("0");
     setMilesDriven("");
+    setMonthlyData(Array.from({length: 12}, () => ({income: "", miles: "", expenses: "0"})));
+    setMonthlySetAside(null);
     setW2Result(null);
     setSeResult(null);
     setCompareResult(null);
@@ -192,7 +209,7 @@ export default function Calculator() {
                   <div className="col-span-4">Income ($)</div>
                   <div className="col-span-3">Miles</div>
                   <div className="col-span-3">Expenses ($)</div>
-                  <div className="col-span-1 text-right">Set aside</div>
+                  <div className="col-span-1 text-right text-amber-700">Set aside</div>
                 </div>
                 {monthlyData.map((m, i) => (
                   <div key={i} className="grid grid-cols-12 gap-1 items-center">
@@ -206,8 +223,8 @@ export default function Calculator() {
                     <div className="col-span-3">
                       <input type="number" value={m.expenses} onChange={(e) => { const newData = [...monthlyData]; newData[i] = {...newData[i], expenses: e.target.value}; setMonthlyData(newData); }} placeholder="0" className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-blue-500 outline-none" min="0" />
                     </div>
-                    <div className="col-span-1 text-xs text-gray-400" title="Est. tax set-aside">
-                      {m.income && parseFloat(m.income) > 0 ? formatUSD(parseFloat(m.income || "0") * (seResult?.effectiveRate || 25) / 100) : "—"}
+                    <div className="col-span-1 text-xs font-semibold text-amber-700" title="Tax set-aside">
+                      {m.income && parseFloat(m.income) > 0 ? formatUSD(parseFloat(m.income) * (monthlySetAside?.rate || seResult?.effectiveRate || 25) / 100) : "—"}
                     </div>
                   </div>
                 ))}
@@ -216,7 +233,7 @@ export default function Calculator() {
                   <div className="col-span-4">{formatUSD(monthlyData.reduce((s, m) => s + (parseFloat(m.income) || 0), 0))}</div>
                   <div className="col-span-3">{monthlyData.reduce((s, m) => s + (parseFloat(m.miles) || 0), 0).toLocaleString()} mi</div>
                   <div className="col-span-3">{formatUSD(monthlyData.reduce((s, m) => s + (parseFloat(m.expenses) || 0), 0))}</div>
-                  <div className="col-span-1 text-right">Set aside</div>
+                  <div className="col-span-1 text-right text-amber-700">Set aside</div>
                 </div>
               </div>
             )}
