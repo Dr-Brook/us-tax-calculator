@@ -56,16 +56,17 @@ export default function Calculator() {
     setSeResult(null);
   };
 
-  const handleReset = () => {
-    setGrossSalary("");
-    setSeIncome("");
-    setSeExpenses("0");
+  const handleTabChange = (newTab: Tab) => {
+    setTab(newTab);
     setW2Result(null);
     setSeResult(null);
     setCompareResult(null);
   };
 
-  const resetResults = () => {
+  const handleReset = () => {
+    setGrossSalary("");
+    setSeIncome("");
+    setSeExpenses("0");
     setW2Result(null);
     setSeResult(null);
     setCompareResult(null);
@@ -76,13 +77,13 @@ export default function Calculator() {
       {/* Year & Filing Status Toggles */}
       <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
         <div className="flex gap-2">
-          <button onClick={() => { setYear(2024); resetResults(); }} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${year === 2024 ? "bg-blue-700 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}>2024</button>
-          <button onClick={() => { setYear(2025); resetResults(); }} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${year === 2025 ? "bg-blue-700 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}>2025</button>
-          <button onClick={() => { setYear(2026); resetResults(); }} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${year === 2026 ? "bg-blue-700 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}>2026</button>
+          <button onClick={() => { setYear(2024); setW2Result(null); setSeResult(null); setCompareResult(null); }} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${year === 2024 ? "bg-blue-700 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}>2024</button>
+          <button onClick={() => { setYear(2025); setW2Result(null); setSeResult(null); setCompareResult(null); }} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${year === 2025 ? "bg-blue-700 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}>2025</button>
+          <button onClick={() => { setYear(2026); setW2Result(null); setSeResult(null); setCompareResult(null); }} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${year === 2026 ? "bg-blue-700 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}>2026</button>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => { setFilingStatus("single"); resetResults(); }} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filingStatus === "single" ? "bg-blue-700 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}>Single</button>
-          <button onClick={() => { setFilingStatus("mfj"); resetResults(); }} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filingStatus === "mfj" ? "bg-blue-700 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}>Married Filing Jointly</button>
+          <button onClick={() => { setFilingStatus("single"); setW2Result(null); setSeResult(null); setCompareResult(null); }} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filingStatus === "single" ? "bg-blue-700 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}>Single</button>
+          <button onClick={() => { setFilingStatus("mfj"); setW2Result(null); setSeResult(null); setCompareResult(null); }} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filingStatus === "mfj" ? "bg-blue-700 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}>Married Filing Jointly</button>
         </div>
       </div>
 
@@ -93,7 +94,7 @@ export default function Calculator() {
           { key: "1099" as Tab, label: "1099 / Self-Employed" },
           { key: "compare" as Tab, label: "Compare W-2 vs 1099" },
         ]).map(({ key, label }) => (
-          <button key={key} onClick={() => { setTab(key); handleReset(); }} className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors ${tab === key ? "bg-white text-blue-800 shadow-sm" : "text-gray-600 hover:text-gray-800"}`}>{label}</button>
+          <button key={key} onClick={() => handleTabChange(key)} className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors ${tab === key ? "bg-white text-blue-800 shadow-sm" : "text-gray-600 hover:text-gray-800"}`}>{label}</button>
         ))}
       </div>
 
