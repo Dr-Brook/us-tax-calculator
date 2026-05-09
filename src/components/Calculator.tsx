@@ -192,7 +192,7 @@ export default function Calculator() {
                   <div className="col-span-4">Income ($)</div>
                   <div className="col-span-3">Miles</div>
                   <div className="col-span-3">Expenses ($)</div>
-                  <div className="col-span-1"></div>
+                  <div className="col-span-1 text-right">Set aside</div>
                 </div>
                 {monthlyData.map((m, i) => (
                   <div key={i} className="grid grid-cols-12 gap-1 items-center">
@@ -206,8 +206,8 @@ export default function Calculator() {
                     <div className="col-span-3">
                       <input type="number" value={m.expenses} onChange={(e) => { const newData = [...monthlyData]; newData[i] = {...newData[i], expenses: e.target.value}; setMonthlyData(newData); }} placeholder="0" className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-blue-500 outline-none" min="0" />
                     </div>
-                    <div className="col-span-1 text-xs text-gray-400">
-                      {m.income && parseFloat(m.income) > 0 ? formatUSD(parseFloat(m.income || "0") * (seResult?.effectiveRate || 30) / 100) : "—"}
+                    <div className="col-span-1 text-xs text-gray-400" title="Est. tax set-aside">
+                      {m.income && parseFloat(m.income) > 0 ? formatUSD(parseFloat(m.income || "0") * (seResult?.effectiveRate || 25) / 100) : "—"}
                     </div>
                   </div>
                 ))}
@@ -216,7 +216,7 @@ export default function Calculator() {
                   <div className="col-span-4">{formatUSD(monthlyData.reduce((s, m) => s + (parseFloat(m.income) || 0), 0))}</div>
                   <div className="col-span-3">{monthlyData.reduce((s, m) => s + (parseFloat(m.miles) || 0), 0).toLocaleString()} mi</div>
                   <div className="col-span-3">{formatUSD(monthlyData.reduce((s, m) => s + (parseFloat(m.expenses) || 0), 0))}</div>
-                  <div className="col-span-1"></div>
+                  <div className="col-span-1 text-right">Set aside</div>
                 </div>
               </div>
             )}
