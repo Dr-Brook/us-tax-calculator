@@ -58,7 +58,7 @@ export default function Calculator() {
     setSeResult(null);
   };
 
-  const MILEAGE_RATE: Record<TaxYear, number> = { 2024: 0.67, 2025: 0.70, 2026: 0.71 };
+  const MILEAGE_RATE: Record<TaxYear, number> = { 2024: 0.67, 2025: 0.70, 2026: 0.725 };
 
   const handleTabChange = (newTab: Tab) => {
     setTab(newTab);
